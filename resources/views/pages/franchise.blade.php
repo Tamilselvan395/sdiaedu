@@ -110,29 +110,14 @@
 
                     <!-- Action Bar (Back to Search & Print Certificate) -->
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
-                        <div class="flex items-center gap-2">
-                            <a 
-                                href="{{ route('pages.franchise') }}" 
-                                style="background-color: #ffffff !important; color: #00a859 !important; border: 2px solid #00a859 !important;" 
-                                class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-emerald-50 transition shadow-2xs cursor-pointer active:scale-95"
-                            >
-                                <i class="fa-solid fa-arrow-left"></i>
-                                <span>Back to Search</span>
-                            </a>
-
-                            <button 
-                                type="button" 
-                                @click="
-                                    navigator.clipboard.writeText('{{ $franchiseCanonical }}');
-                                    copyFeedback = true;
-                                    setTimeout(() => copyFeedback = false, 2500);
-                                "
-                                class="inline-flex items-center gap-1.5 rounded-xl bg-white text-slate-700 hover:text-slate-900 border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition shadow-2xs cursor-pointer"
-                            >
-                                <i class="fa-regular fa-copy text-amber-500 text-xs"></i>
-                                <span x-text="copyFeedback ? 'Copied!' : 'Share SEO Link'"></span>
-                            </button>
-                        </div>
+                        <a 
+                            href="{{ route('pages.franchise') }}" 
+                            style="background-color: #ffffff !important; color: #00a859 !important; border: 2px solid #00a859 !important;" 
+                            class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-emerald-50 transition shadow-2xs cursor-pointer active:scale-95"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Back to Search</span>
+                        </a>
 
                         <div class="flex items-center gap-2">
                             @if($selectedFranchise->certificate_image_url)
