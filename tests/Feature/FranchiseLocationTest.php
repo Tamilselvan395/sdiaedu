@@ -117,7 +117,7 @@ class FranchiseLocationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get(route('pages.franchise', ['franchise_id' => 'SDIA-F-0006/2026']));
+        $response = $this->get(route('pages.franchise.verify', ['code' => 'SDIA-F-0006-2026']));
 
         $response->assertStatus(200);
         $response->assertSee('Trichy - Thillai Nagar Center');

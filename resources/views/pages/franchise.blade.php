@@ -1,13 +1,29 @@
 @php
+    $franchiseCodeClean = $selectedFranchise ? str_replace(['/', ' '], ['-', ''], $selectedFranchise->franchise_id ?? $selectedFranchise->slug) : '';
+    $franchiseCanonical = ($searched && $selectedFranchise) 
+        ? route('pages.franchise.verify', ['code' => $franchiseCodeClean])
+        : route('pages.franchise');
+
     $franchiseTitle = ($searched && $selectedFranchise) 
-        ? 'Franchise Partner Verification - ' . ($selectedFranchise->franchise_id ?? $selectedFranchise->name) . ' | Sri Deekshaa International Academy' 
+        ? 'Franchise Partner Verification - ' . $selectedFranchise->name . ' (' . ($selectedFranchise->franchise_id ?? 'SDIA Partner') . ') | Sri Deekshaa International Academy' 
         : ($globalSettings['seo_franchise_title'] ?? 'Verify Franchise Partner | Sri Deekshaa International Academy');
+
     $franchiseDesc = ($searched && $selectedFranchise) 
-        ? 'Official franchise accreditation certificate, authorized contact number, and campus address for ' . $selectedFranchise->name . ' (' . ($selectedFranchise->franchise_id ?? 'SDIA Partner') . ').' 
+        ? 'Official franchise partner accreditation certificate and authorized contact desk for ' . $selectedFranchise->name . ' (' . ($selectedFranchise->franchise_id ?? 'SDIA Partner') . '), ' . $selectedFranchise->city . '. Authorized partner of Sri Deekshaa International Academy.' 
         : ($globalSettings['seo_franchise_description'] ?? 'Official online franchise verification portal for Sri Deekshaa International Academy. Verify partner credentials, accreditation certificates, and authorized center details.');
+
+    $franchiseOgImage = ($selectedFranchise && $selectedFranchise->certificate_image_url) 
+        ? $selectedFranchise->certificate_image_url 
+        : asset('images/franchise-partner-certificate.jpg');
+
     $isJpAcademy = $selectedFranchise && (str_contains(strtoupper($selectedFranchise->name), 'JP ACADEMY') || $selectedFranchise->franchise_id === 'SDIA-F-0013/2026' || $selectedFranchise->slug === 'jp-academy');
 @endphp
-<x-layouts.app :title="$franchiseTitle" :metaDescription="$franchiseDesc">
+<x-layouts.app 
+    :title="$franchiseTitle" 
+    :metaDescription="$franchiseDesc"
+    :canonical="$franchiseCanonical"
+    :ogImage="$franchiseOgImage"
+>
     <style>
         @page {
             size: A4 portrait;
@@ -94,14 +110,29 @@
 
                     <!-- Action Bar (Back to Search & Print Certificate) -->
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
-                        <a 
-                            href="{{ route('pages.franchise') }}" 
-                            style="background-color: #ffffff !important; color: #00a859 !important; border: 2px solid #00a859 !important;" 
-                            class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-emerald-50 transition shadow-2xs cursor-pointer active:scale-95"
-                        >
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span>Back to Search</span>
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a 
+                                href="{{ route('pages.franchise') }}" 
+                                style="background-color: #ffffff !important; color: #00a859 !important; border: 2px solid #00a859 !important;" 
+                                class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-emerald-50 transition shadow-2xs cursor-pointer active:scale-95"
+                            >
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Back to Search</span>
+                            </a>
+
+                            <button 
+                                type="button" 
+                                @click="
+                                    navigator.clipboard.writeText('{{ $franchiseCanonical }}');
+                                    copyFeedback = true;
+                                    setTimeout(() => copyFeedback = false, 2500);
+                                "
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-white text-slate-700 hover:text-slate-900 border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+                            >
+                                <i class="fa-regular fa-copy text-amber-500 text-xs"></i>
+                                <span x-text="copyFeedback ? 'Copied!' : 'Share SEO Link'"></span>
+                            </button>
+                        </div>
 
                         <div class="flex items-center gap-2">
                             @if($selectedFranchise->certificate_image_url)
@@ -481,6 +512,13 @@
                     <form 
                         action="{{ route('pages.franchise') }}" 
                         method="GET" 
+                        onsubmit="
+                            var code = this.franchise_id.value.trim().replace(/[\/\s]/g, '-');
+                            if (code) {
+                                event.preventDefault();
+                                window.location.href = '{{ url('/franchise/verify') }}/' + encodeURIComponent(code);
+                            }
+                        "
                         class="space-y-4"
                     >
                         <label class="block text-sm font-bold text-slate-900">
@@ -512,11 +550,11 @@
                     <div class="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
                         <span>Sample Partner ID:</span>
                         <a 
-                            href="{{ route('pages.franchise', ['franchise_id' => 'SDIA-F-0013/2026']) }}" 
+                            href="{{ route('pages.franchise.verify', ['code' => 'SDIA-F-0013-2026']) }}" 
                             class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-bold hover:bg-amber-100 transition"
                         >
                             <i class="fa-solid fa-certificate text-amber-600"></i>
-                            <span>SDIA-F-0013/2026 (JP ACADEMY)</span>
+                            <span>SDIA-F-0013-2026 (JP ACADEMY)</span>
                         </a>
                     </div>
                 </div>

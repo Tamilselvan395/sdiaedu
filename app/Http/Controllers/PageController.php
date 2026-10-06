@@ -29,28 +29,44 @@ class PageController extends Controller
         return view('pages.contact', compact('locations', 'faqs'));
     }
 
-    public function franchise(Request $request, ?string $code = null): View
+    public function franchise(Request $request): mixed
     {
-        $locations = Location::where('is_active', true)->orderBy('sort_order')->get();
+        $rawQuery = trim((string) $request->query('franchise_id', $request->query('code', '')));
 
-        $queryCode = trim($code ?? $request->query('code', $request->query('franchise_id', '')));
-        $searched = ! empty($queryCode);
+        if ($rawQuery !== '') {
+            $cleanCode = str_replace(['/', ' '], ['-', ''], $rawQuery);
 
-        $selectedFranchise = null;
-
-        if ($searched) {
-            $normalized = strtoupper($queryCode);
-            $selectedFranchise = Location::where('is_active', true)
-                ->where(function ($q) use ($queryCode, $normalized) {
-                    $q->where('franchise_id', $queryCode)
-                        ->orWhere('franchise_id', $normalized)
-                        ->orWhere('slug', strtolower($queryCode))
-                        ->orWhere('name', 'like', "%{$queryCode}%");
-                })
-                ->first();
+            return redirect()->route('pages.franchise.verify', ['code' => $cleanCode]);
         }
 
-        return view('pages.franchise', compact('locations', 'selectedFranchise', 'searched', 'queryCode'));
+        $searched = false;
+        $selectedFranchise = null;
+        $queryCode = '';
+
+        return view('pages.franchise', compact('selectedFranchise', 'searched', 'queryCode'));
+    }
+
+    public function franchiseVerify(string $code): View
+    {
+        $queryCode = trim(urldecode($code));
+        $searched = true;
+
+        $slashCode = preg_replace('/-([0-9]{4})$/', '/$1', $queryCode);
+        $hyphenCode = str_replace('/', '-', $queryCode);
+
+        $selectedFranchise = Location::where('is_active', true)
+            ->where(function ($q) use ($queryCode, $slashCode, $hyphenCode) {
+                $q->where('franchise_id', $queryCode)
+                    ->orWhere('franchise_id', strtoupper($queryCode))
+                    ->orWhere('franchise_id', $slashCode)
+                    ->orWhere('franchise_id', strtoupper($slashCode))
+                    ->orWhere('franchise_id', $hyphenCode)
+                    ->orWhere('slug', strtolower($queryCode))
+                    ->orWhere('name', 'like', "%{$queryCode}%");
+            })
+            ->first();
+
+        return view('pages.franchise', compact('selectedFranchise', 'searched', 'queryCode'));
     }
 
     public function forKids(): View

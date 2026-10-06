@@ -212,8 +212,12 @@ class PageControllerTest extends TestCase
         $response->assertSee('Enter Franchise Identification Number');
         $response->assertDontSee('54, DB Road, RS Puram');
 
-        // Submitting Franchise ID: shows certificate and contact/address details below
-        $searchResponse = $this->get(route('pages.franchise', ['franchise_id' => 'SDIA-F-0003/2026']));
+        // Submitting Franchise ID query param redirects to clean SEO URL
+        $redirectResponse = $this->get(route('pages.franchise', ['franchise_id' => 'SDIA-F-0003/2026']));
+        $redirectResponse->assertRedirect(route('pages.franchise.verify', ['code' => 'SDIA-F-0003-2026']));
+
+        // Clean SEO URL renders certificate and contact/address details below
+        $searchResponse = $this->get(route('pages.franchise.verify', ['code' => 'SDIA-F-0003-2026']));
         $searchResponse->assertStatus(200);
         $searchResponse->assertSee('Franchise Partner Verification Results');
         $searchResponse->assertSee('Sri Deekshaa Coimbatore Center');
