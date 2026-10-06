@@ -192,8 +192,9 @@ class PageControllerTest extends TestCase
 
     public function test_franchise_page_returns_ok_and_shows_address_map_and_form(): void
     {
-        Location::factory()->create([
+        $location = Location::factory()->create([
             'name' => 'Sri Deekshaa Coimbatore Center',
+            'franchise_id' => 'SDIA-F-0003/2026',
             'city' => 'Coimbatore',
             'state' => 'Tamil Nadu',
             'address' => '54, DB Road, RS Puram',
@@ -204,20 +205,24 @@ class PageControllerTest extends TestCase
             'is_active' => true,
         ]);
 
+        // Default view: shows verification form only (no cards)
         $response = $this->get(route('pages.franchise'));
-
         $response->assertStatus(200);
-        $response->assertSee('Franchise Enquiries');
-        $response->assertSee('Center Locations');
-        $response->assertSee('Master Franchise Office');
-        $response->assertSee('Submit Franchise Enquiry');
-        $response->assertSee('All Franchise Centers');
-        $response->assertSee('Sri Deekshaa Coimbatore Center');
-        $response->assertSee('54, DB Road, RS Puram');
-        $response->assertSee('641002');
-        $response->assertSee('+91 98765 43212');
-        $response->assertSee('coimbatore@srideekshaa.com');
-        $response->assertSee('https://maps.google.com/maps?q=RS+Puram+Coimbatore');
+        $response->assertSee('Verify Franchise Partner');
+        $response->assertSee('Enter Franchise Identification Number');
+        $response->assertDontSee('54, DB Road, RS Puram');
+
+        // Submitting Franchise ID: shows certificate and contact/address details below
+        $searchResponse = $this->get(route('pages.franchise', ['franchise_id' => 'SDIA-F-0003/2026']));
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee('Franchise Partner Verification Results');
+        $searchResponse->assertSee('Sri Deekshaa Coimbatore Center');
+        $searchResponse->assertSee('SDIA-F-0003/2026');
+        $searchResponse->assertSee('54, DB Road, RS Puram');
+        $searchResponse->assertSee('641002');
+        $searchResponse->assertSee('+91 98765 43212');
+        $searchResponse->assertSee('coimbatore@srideekshaa.com');
+        $searchResponse->assertSee('https://maps.google.com/maps?q=RS+Puram+Coimbatore');
     }
 
     public function test_franchise_enquiry_submission_stores_enquiry(): void

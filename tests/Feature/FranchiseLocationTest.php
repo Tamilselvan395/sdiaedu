@@ -107,6 +107,7 @@ class FranchiseLocationTest extends TestCase
         Location::create([
             'name' => 'Trichy - Thillai Nagar Center',
             'slug' => 'trichy-thillai-nagar-center',
+            'franchise_id' => 'SDIA-F-0006/2026',
             'city' => 'Tiruchirappalli',
             'state' => 'Tamil Nadu',
             'address' => '10th Cross, Thillai Nagar',
@@ -116,7 +117,7 @@ class FranchiseLocationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get(route('pages.franchise'));
+        $response = $this->get(route('pages.franchise', ['franchise_id' => 'SDIA-F-0006/2026']));
 
         $response->assertStatus(200);
         $response->assertSee('Trichy - Thillai Nagar Center');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Certificate;
 use App\Models\Course;
+use App\Models\CourseCategory;
 use App\Models\Faq;
 use App\Models\Location;
 use App\Models\SkillAssessment;
@@ -28,11 +29,28 @@ class PageController extends Controller
         return view('pages.contact', compact('locations', 'faqs'));
     }
 
-    public function franchise(): View
+    public function franchise(Request $request, ?string $code = null): View
     {
         $locations = Location::where('is_active', true)->orderBy('sort_order')->get();
 
-        return view('pages.franchise', compact('locations'));
+        $queryCode = trim($code ?? $request->query('code', $request->query('franchise_id', '')));
+        $searched = ! empty($queryCode);
+
+        $selectedFranchise = null;
+
+        if ($searched) {
+            $normalized = strtoupper($queryCode);
+            $selectedFranchise = Location::where('is_active', true)
+                ->where(function ($q) use ($queryCode, $normalized) {
+                    $q->where('franchise_id', $queryCode)
+                        ->orWhere('franchise_id', $normalized)
+                        ->orWhere('slug', strtolower($queryCode))
+                        ->orWhere('name', 'like', "%{$queryCode}%");
+                })
+                ->first();
+        }
+
+        return view('pages.franchise', compact('locations', 'selectedFranchise', 'searched', 'queryCode'));
     }
 
     public function forKids(): View
@@ -65,11 +83,16 @@ class PageController extends Controller
 
     public function assessment(): View
     {
+        $categories = CourseCategory::where('is_active', true)
+            ->with(['activeCourses' => fn ($q) => $q->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
         $assessment = SkillAssessment::where('is_active', true)
             ->with(['questions' => fn ($q) => $q->orderBy('sort_order')])
             ->first();
 
-        return view('pages.assessment', compact('assessment'));
+        return view('pages.assessment', compact('assessment', 'categories'));
     }
 
     public function verifyCertificate(Request $request)

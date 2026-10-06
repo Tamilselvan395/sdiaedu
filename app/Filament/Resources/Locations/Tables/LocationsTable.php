@@ -34,6 +34,15 @@ class LocationsTable
                     ->weight('bold')
                     ->description(fn (Location $record): ?string => $record->address ? Str::limit($record->address, 40) : null),
 
+                TextColumn::make('franchise_id')
+                    ->label('Franchise ID')
+                    ->badge()
+                    ->color('success')
+                    ->copyable()
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Not Assigned'),
+
                 TextColumn::make('city')
                     ->label('City')
                     ->badge()

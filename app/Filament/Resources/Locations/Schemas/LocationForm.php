@@ -51,6 +51,21 @@ class LocationForm
                                             ->placeholder('e.g. chennai-velachery-center'),
                                     ]),
 
+                                    Grid::make(2)->schema([
+                                        TextInput::make('franchise_id')
+                                            ->label('Franchise Partner ID')
+                                            ->maxLength(50)
+                                            ->unique('locations', 'franchise_id', ignoreRecord: true)
+                                            ->placeholder('e.g. SDIA-F-0013/2026')
+                                            ->helperText('Official franchise identification code printed on the partner credential certificate.'),
+
+                                        TextInput::make('partnership_year')
+                                            ->label('Partnership Year')
+                                            ->numeric()
+                                            ->default(2026)
+                                            ->helperText('Year when franchise partnership was established (e.g. 2026).'),
+                                    ]),
+
                                     Grid::make(3)->schema([
                                         TextInput::make('city')
                                             ->label('City')
@@ -116,6 +131,17 @@ class LocationForm
                     Tab::make('Media & Maps')
                         ->icon(Heroicon::OutlinedPhoto)
                         ->schema([
+                            Section::make('Franchise Partner Certificate')
+                                ->description('Upload official partner certificate image for public credential verification.')
+                                ->schema([
+                                    ImageUploadService::configure(
+                                        FileUpload::make('certificate_image')
+                                            ->label('Official Franchise Certificate Image')
+                                            ->directory('franchises/certificates')
+                                            ->image()
+                                    )->helperText('Upload the scanned or digital certificate of acknowledgement (JPEG, PNG, WebP). When searched on /franchise, this certificate is displayed above the contact number and address.'),
+                                ]),
+
                             Section::make('Campus Visuals & Map')
                                 ->description('Upload center facade/classroom photo and configure Google Maps embed.')
                                 ->schema([

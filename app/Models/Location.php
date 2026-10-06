@@ -51,4 +51,17 @@ class Location extends Model
 
         return Storage::disk('public')->url($this->image);
     }
+
+    public function getCertificateImageUrlAttribute(): ?string
+    {
+        if (! blank($this->certificate_image)) {
+            return Storage::disk('public')->url($this->certificate_image);
+        }
+
+        if ($this->slug === 'jp-academy' || $this->franchise_id === 'SDIA-F-0013/2026') {
+            return asset('images/franchise-partner-certificate.jpg');
+        }
+
+        return null;
+    }
 }
