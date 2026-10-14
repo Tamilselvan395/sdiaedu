@@ -136,7 +136,8 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-2"
-                            class="absolute top-full -left-20 lg:-left-28 w-[860px] xl:w-[960px] rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 ring-1 ring-slate-900/5 z-50"
+                            class="absolute top-full rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 ring-1 ring-slate-900/5 z-50"
+                            style="left: -110px; width: min(940px, calc(100vw - 2rem)); max-width: calc(100vw - 2rem);"
                             x-cloak
                         >
                             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
@@ -242,7 +243,8 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-2"
-                            class="absolute top-full -left-48 lg:-left-64 w-[860px] xl:w-[960px] rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 ring-1 ring-slate-900/5 z-50 max-h-[85vh] overflow-y-auto"
+                            class="absolute top-full rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 ring-1 ring-slate-900/5 z-50 max-h-[85vh] overflow-y-auto"
+                            style="left: -260px; width: min(940px, calc(100vw - 2rem)); max-width: calc(100vw - 2rem);"
                             x-cloak
                         >
                             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
