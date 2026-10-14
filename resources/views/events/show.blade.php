@@ -75,6 +75,13 @@
                     <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
                         Fee: {{ $event->registration_fee > 0 ? '₹' . number_format($event->registration_fee) : 'Free Registration' }}
                     </span>
+
+                    @if($certificates->count() > 0)
+                        <a href="#certificates" class="rounded-full bg-amber-400 text-slate-950 font-bold px-3.5 py-1 text-xs flex items-center gap-1.5 hover:bg-amber-300 transition shadow-xs">
+                            <i class="fa-solid fa-file-pdf text-red-600"></i>
+                            <span>{{ $certificates->count() }} Certificates Ready for Download</span>
+                        </a>
+                    @endif
                 </div>
 
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
@@ -188,6 +195,149 @@
                         </div>
                     </div>
 
+                    <!-- Participant Certificates Download Section -->
+                    <div id="certificates" class="rounded-3xl bg-white p-6 sm:p-10 border border-slate-200/80 shadow-xs space-y-6 scroll-mt-24">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
+                            <div>
+                                <div class="inline-flex items-center gap-2 rounded-full bg-emerald-100 text-emerald-800 px-3.5 py-1 text-xs font-bold uppercase tracking-wider border border-emerald-200">
+                                    <i class="fa-solid fa-award"></i>
+                                    <span>Verified Credentials</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+                                    Participant Certificates
+                                </h3>
+                                <p class="text-sm text-slate-600 mt-1">
+                                    Search by participant name or registration number to download official PDF certificates.
+                                </p>
+                            </div>
+                            @if($certificates->count() > 0)
+                                <div class="shrink-0">
+                                    <span class="inline-flex items-center gap-1.5 rounded-2xl bg-slate-900 text-white font-bold text-xs px-4 py-2.5 shadow-sm">
+                                        <i class="fa-solid fa-file-pdf text-amber-400"></i>
+                                        <span>{{ $certificates->count() }} Certificates Ready</span>
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+
+                        @if($certificates->count() > 0)
+                            <div x-data="{
+                                search: '',
+                                certificates: {{ \Illuminate\Support\Js::from($certificates->map(fn($c) => [
+                                    'id' => $c->id,
+                                    'name' => $c->participant_name,
+                                    'reg_no' => $c->registration_number ?? '',
+                                    'cert_no' => $c->certificate_number ?? '',
+                                    'title' => $c->certificate_title ?: 'Certificate of Participation',
+                                    'remarks' => $c->remarks ?? '',
+                                    'file_url' => $c->file_url,
+                                    'download_url' => route('events.certificates.download', ['slug' => $event->slug, 'certificate' => $c->id]),
+                                ])) }},
+                                get filtered() {
+                                    if (!this.search.trim()) return this.certificates;
+                                    const query = this.search.toLowerCase().trim();
+                                    return this.certificates.filter(c => 
+                                        c.name.toLowerCase().includes(query) ||
+                                        c.reg_no.toLowerCase().includes(query) ||
+                                        c.cert_no.toLowerCase().includes(query) ||
+                                        c.title.toLowerCase().includes(query)
+                                    );
+                                }
+                            }" class="space-y-6">
+
+                                <!-- Search Input -->
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-magnifying-glass text-base"></i>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        x-model="search"
+                                        placeholder="Search by participant name, roll number, or certificate ID..."
+                                        class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        x-show="search.length > 0" 
+                                        @click="search = ''"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                                    >
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Real-time Participant Certificates List -->
+                                <div class="space-y-3">
+                                    <template x-for="cert in filtered" :key="cert.id">
+                                        <div class="rounded-2xl border border-slate-200 p-4 sm:p-5 bg-gradient-to-r from-slate-50/50 to-white hover:border-amber-300 hover:shadow-md transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                            <div class="space-y-1.5 flex-1 min-w-0">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <h4 class="font-bold text-slate-900 text-base sm:text-lg truncate" x-text="cert.name"></h4>
+                                                    <span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold px-2.5 py-0.5" x-text="cert.title"></span>
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                                                    <template x-if="cert.reg_no">
+                                                        <span>Reg No: <strong class="text-slate-700" x-text="cert.reg_no"></strong></span>
+                                                    </template>
+                                                    <template x-if="cert.cert_no">
+                                                        <span>Certificate ID: <strong class="text-slate-700" x-text="cert.cert_no"></strong></span>
+                                                    </template>
+                                                    <template x-if="cert.remarks">
+                                                        <span class="text-slate-600 italic" x-text="'(' + cert.remarks + ')'"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <a 
+                                                    :href="cert.file_url" 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs transition"
+                                                    title="Preview Certificate in browser"
+                                                >
+                                                    <i class="fa-regular fa-eye text-slate-500"></i>
+                                                    <span>Preview</span>
+                                                </a>
+                                                <a 
+                                                    :href="cert.download_url" 
+                                                    class="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 text-xs shadow-xs transition active:scale-95"
+                                                    title="Download Certificate PDF"
+                                                >
+                                                    <i class="fa-solid fa-download"></i>
+                                                    <span>Download PDF</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Empty search result state -->
+                                    <div x-show="filtered.length === 0" class="rounded-2xl border border-dashed border-slate-300 p-8 text-center space-y-2">
+                                        <div class="h-12 w-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto text-lg">
+                                            <i class="fa-solid fa-file-circle-question"></i>
+                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-sm">No Participant Certificate Found</h4>
+                                        <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                                            We could not find any certificate matching "<span x-text="search" class="font-semibold text-slate-700"></span>". Please check the name spelling or registration number.
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        @else
+                            <!-- Placeholder state when no certificates have been uploaded yet -->
+                            <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center space-y-3">
+                                <div class="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-xl">
+                                    <i class="fa-solid fa-certificate"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-base">Participant Certificates Upload</h4>
+                                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                                    Official participant certificates will be uploaded here following event verification. Check back soon or contact your event coordinator for updates.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+
                 </div>
 
                 <!-- Right Sticky Registration Card -->
@@ -254,6 +404,16 @@
                                     >
                                         {{ $event->cta_button_text ?: 'Register for Event' }}
                                     </button>
+                                @endif
+
+                                @if($certificates->count() > 0)
+                                    <a 
+                                        href="#certificates" 
+                                        class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 text-sm text-center shadow-md transition active:scale-95"
+                                    >
+                                        <i class="fa-solid fa-file-arrow-down"></i>
+                                        <span>Download Certificates ({{ $certificates->count() }})</span>
+                                    </a>
                                 @endif
 
                                 <x-whatsapp-btn 

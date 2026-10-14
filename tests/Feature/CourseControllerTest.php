@@ -149,4 +149,139 @@ class CourseControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('cheerful-child-learning-with-abacus.webp');
     }
+
+    public function test_courses_index_redirects_audience_teacher_query_to_clean_seo_url(): void
+    {
+        $response = $this->get('/courses?audience=teacher');
+
+        $response->assertStatus(301);
+        $response->assertRedirect(route('teacher-training.index'));
+    }
+
+    public function test_courses_category_redirects_audience_teacher_query_to_clean_seo_url(): void
+    {
+        $response = $this->get('/courses/category/brain-and-academic-excellence?audience=teacher');
+
+        $response->assertStatus(301);
+        $response->assertRedirect(route('teacher-training.category', 'brain-and-academic-excellence'));
+    }
+
+    public function test_teacher_training_category_renders_teacher_courses(): void
+    {
+        $category = CourseCategory::factory()->create([
+            'name' => 'Brain & Academic Excellence',
+            'slug' => 'brain-and-academic-excellence',
+            'is_active' => true,
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Student Abacus Learning',
+            'target_audience' => 'student',
+            'is_active' => true,
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Abacus Teacher Training TTC',
+            'slug' => 'abacus-teacher-training',
+            'target_audience' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('teacher-training.category', 'brain-and-academic-excellence'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Abacus Teacher Training TTC');
+        $response->assertSee('Teacher Training (TTC)');
+        $this->assertFalse($response->viewData('courses')->contains('title', 'Student Abacus Learning'));
+    }
+
+    public function test_teacher_training_index_renders_teacher_courses(): void
+    {
+        $category = CourseCategory::factory()->create(['name' => 'Brain Academy', 'is_active' => true]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Student Course Exclusive',
+            'target_audience' => 'student',
+            'is_active' => true,
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Phonics Teacher Training Course',
+            'target_audience' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('teacher-training.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Phonics Teacher Training Course');
+        $this->assertFalse($response->viewData('courses')->contains('title', 'Student Course Exclusive'));
+    }
+
+    public function test_header_renders_students_and_teachers_navigation(): void
+    {
+        $category = CourseCategory::factory()->create(['name' => 'Brain Academy', 'is_active' => true]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Student Abacus Fun',
+            'target_audience' => 'student',
+            'is_active' => true,
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Vedic Maths Teacher TTC',
+            'slug' => 'vedic-maths-teacher-training',
+            'target_audience' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Students');
+        $response->assertSee('Teachers');
+        $response->assertSee('5 Specialized TTC Domains');
+        $response->assertSee('Vedic Maths Teacher TTC');
+        $response->assertDontSee('All Programs');
+    }
+
+    public function test_course_show_for_student_displays_student_track_and_hides_teacher_track(): void
+    {
+        $category = CourseCategory::factory()->create(['name' => 'Skill Academy', 'is_active' => true]);
+        $course = Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Student Abacus Learning',
+            'slug' => 'student-abacus-learning',
+            'target_audience' => 'student',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('courses.show', $course->slug));
+
+        $response->assertStatus(200);
+        $response->assertSee('Student Track');
+        $response->assertSee('Book Free Student Trial');
+        $response->assertDontSee('Teacher Training Track (TTC)');
+        $response->assertDontSee('Inquire for Teacher Training');
+    }
+
+    public function test_course_show_for_teacher_displays_teacher_track_and_hides_student_track(): void
+    {
+        $category = CourseCategory::factory()->create(['name' => 'Skill Academy', 'is_active' => true]);
+        $course = Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Abacus Teacher Training Course',
+            'slug' => 'abacus-teacher-training-ttc',
+            'target_audience' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('courses.show', $course->slug));
+
+        $response->assertStatus(200);
+        $response->assertSee('Teacher Training Track (TTC)');
+        $response->assertSee('Inquire for Teacher Training');
+        $response->assertDontSee('Student Track');
+        $response->assertDontSee('Book Free Student Trial');
+    }
 }

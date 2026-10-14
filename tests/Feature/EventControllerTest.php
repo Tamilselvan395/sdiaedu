@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\EventCertificate;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class EventControllerTest extends TestCase
@@ -169,5 +172,106 @@ class EventControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDontSee('Concluded Science Expo');
+    }
+
+    public function test_event_details_displays_participant_certificates_and_download_elements(): void
+    {
+        $event = Event::create([
+            'title' => 'National Abacus Olympiad 2026',
+            'slug' => 'national-abacus-olympiad-2026',
+            'short_description' => 'Annual national abacus speed arithmetic challenge.',
+            'mode' => 'In-Person',
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(5)->addHours(4),
+            'is_active' => true,
+        ]);
+
+        $cert = EventCertificate::create([
+            'event_id' => $event->id,
+            'participant_name' => 'Aarav Sundaram',
+            'registration_number' => 'NAO-2026-042',
+            'certificate_number' => 'SDIA-EVT-2026-0042',
+            'certificate_title' => '1st Prize Merit Excellence',
+            'certificate_file' => 'events/certificates/aarav-cert.pdf',
+            'is_published' => true,
+        ]);
+
+        $response = $this->get(route('events.show', $event->slug));
+
+        $response->assertStatus(200);
+        $response->assertSee('Participant Certificates');
+        $response->assertSee('1 Certificates Ready');
+        $response->assertSee('Aarav Sundaram');
+        $response->assertSee('NAO-2026-042');
+        $response->assertSee('1st Prize Merit Excellence');
+        $response->assertSee('Download PDF');
+    }
+
+    public function test_participant_can_download_certificate_pdf_successfully(): void
+    {
+        Storage::fake('public');
+
+        $event = Event::create([
+            'title' => 'Tamil Nadu State Chess Championship',
+            'slug' => 'tamil-nadu-state-chess-championship',
+            'short_description' => 'State championship.',
+            'mode' => 'In-Person',
+            'start_date' => now()->subDay(),
+            'end_date' => now()->subHours(2),
+            'is_active' => true,
+        ]);
+
+        $fakeFilePath = 'events/certificates/test-chess-cert.pdf';
+        Storage::disk('public')->put($fakeFilePath, '%PDF-1.4 test certificate content');
+
+        $cert = EventCertificate::create([
+            'event_id' => $event->id,
+            'participant_name' => 'Kavya Raman',
+            'registration_number' => 'TNSC-99',
+            'certificate_file' => $fakeFilePath,
+            'is_published' => true,
+        ]);
+
+        $downloadUrl = route('events.certificates.download', [
+            'slug' => $event->slug,
+            'certificate' => $cert->id,
+        ]);
+
+        $response = $this->get($downloadUrl);
+
+        $response->assertStatus(200);
+        $response->assertHeader('content-disposition');
+    }
+
+    public function test_authenticated_admin_can_view_event_edit_page_with_certificates_relation_manager(): void
+    {
+        $user = User::factory()->create();
+
+        $event = Event::create([
+            'title' => 'Annual Art & Craft Expo 2026',
+            'slug' => 'annual-art-craft-expo-2026',
+            'short_description' => 'Creative showcase.',
+            'mode' => 'In-Person',
+            'start_date' => now()->addDays(10),
+            'end_date' => now()->addDays(10)->addHours(4),
+            'is_active' => true,
+        ]);
+
+        EventCertificate::create([
+            'event_id' => $event->id,
+            'participant_name' => 'Meera Krishnan',
+            'registration_number' => 'ART-101',
+            'certificate_number' => 'SDIA-EVT-2026-ART1',
+            'certificate_title' => 'Certificate of Participation',
+            'certificate_file' => 'events/certificates/meera-art.pdf',
+            'is_published' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get("/admin/events/{$event->slug}/edit");
+
+        $response->assertStatus(200);
+        $response->assertSee('Participant Certificates (PDF)');
+        $response->assertSee('Meera Krishnan');
+        $response->assertSee('ART-101');
     }
 }

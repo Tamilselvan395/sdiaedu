@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
@@ -60,6 +61,21 @@ class CoursesRelationManager extends RelationManager
                     ->weight('semibold')
                     ->description(fn (Course $record): ?string => $record->short_description ? Str::limit($record->short_description, 60) : null),
 
+                TextColumn::make('target_audience')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state?->value ?? (string) $state) {
+                        'teacher' => 'success',
+                        'both' => 'info',
+                        default => 'primary',
+                    })
+                    ->formatStateUsing(fn ($state): string => match ($state?->value ?? (string) $state) {
+                        'teacher' => 'Teacher (TTC)',
+                        'both' => 'Both Tracks',
+                        default => 'Student Track',
+                    })
+                    ->label('Track')
+                    ->sortable(),
+
                 TextColumn::make('short_code')
                     ->badge()
                     ->color('warning')
@@ -92,7 +108,13 @@ class CoursesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('target_audience')
+                    ->options([
+                        'student' => 'Student Track',
+                        'teacher' => 'Teacher Training (TTC)',
+                        'both' => 'Both Tracks',
+                    ])
+                    ->label('Track / Audience'),
             ])
             ->headerActions([
                 CreateAction::make()

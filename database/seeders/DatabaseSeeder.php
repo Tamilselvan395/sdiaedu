@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CertificateSeeder::class,
             EventSeeder::class,
             LocationSeeder::class,
+            TeacherCourseSeeder::class,
         ]);
     }
 }

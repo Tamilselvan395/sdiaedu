@@ -83,4 +83,67 @@ class CourseCategoryEditTest extends TestCase
         $publicResponse->assertSee('Best Music &amp; Dance Classes in Chennai | Sri Deekshaa', false);
         $publicResponse->assertSee('Top rated keyboard, carnatic vocal, and classical dance academy.');
     }
+
+    public function test_authenticated_admin_can_view_course_categories_index_table_with_audience_tabs_and_counts(): void
+    {
+        $user = User::factory()->create();
+
+        $studentCategory = CourseCategory::factory()->create([
+            'name' => 'Early Kids Skills',
+            'target_audience' => 'student',
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $studentCategory->id,
+            'title' => 'Little Phonics',
+            'target_audience' => 'student',
+            'is_active' => true,
+        ]);
+
+        $teacherCategory = CourseCategory::factory()->create([
+            'name' => 'Montessori Teacher Academy',
+            'target_audience' => 'teacher',
+        ]);
+        Course::factory()->create([
+            'course_category_id' => $teacherCategory->id,
+            'title' => 'International Montessori TTC',
+            'target_audience' => 'teacher',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/course-categories');
+
+        $response->assertStatus(200);
+        $response->assertSee('All Categories');
+        $response->assertSee('Student Categories');
+        $response->assertSee('Teacher Training (TTC)');
+        $response->assertSee('Student Courses');
+        $response->assertSee('Teacher TTC');
+        $response->assertSee('Early Kids Skills');
+        $response->assertSee('Montessori Teacher Academy');
+    }
+
+    public function test_authenticated_admin_can_view_courses_index_table_with_tabs(): void
+    {
+        $user = User::factory()->create();
+        $category = CourseCategory::factory()->create();
+
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Student Abacus Program',
+            'target_audience' => 'student',
+        ]);
+
+        Course::factory()->create([
+            'course_category_id' => $category->id,
+            'title' => 'Abacus Teacher Training Course',
+            'target_audience' => 'teacher',
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/courses');
+
+        $response->assertStatus(200);
+        $response->assertSee('All Courses');
+        $response->assertSee('Student Courses');
+        $response->assertSee('Teacher Training (TTC)');
+    }
 }

@@ -25,9 +25,16 @@ class SitemapController extends Controller
             ['url' => route('pages.about'), 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['url' => route('pages.contact'), 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['url' => route('pages.franchise'), 'priority' => '0.8', 'changefreq' => 'monthly'],
+            ['url' => route('teacher-training.index'), 'priority' => '0.9', 'changefreq' => 'daily'],
         ];
 
         $courseCategories = CourseCategory::where('is_active', true)
+            ->whereNotNull('slug')
+            ->select('slug', 'updated_at')
+            ->get();
+
+        $teacherCategories = CourseCategory::where('is_active', true)
+            ->whereHas('courses', fn ($q) => $q->where('is_active', true)->whereIn('target_audience', ['teacher', 'both']))
             ->whereNotNull('slug')
             ->select('slug', 'updated_at')
             ->get();
@@ -52,7 +59,7 @@ class SitemapController extends Controller
             ->select('slug', 'updated_at')
             ->get();
 
-        $xml = view('sitemap.xml', compact('staticUrls', 'courseCategories', 'courses', 'blogCategories', 'blogPosts', 'events'))->render();
+        $xml = view('sitemap.xml', compact('staticUrls', 'courseCategories', 'teacherCategories', 'courses', 'blogCategories', 'blogPosts', 'events'))->render();
 
         return response($xml, 200, [
             'Content-Type' => 'text/xml; charset=UTF-8',

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Event extends Model
@@ -136,5 +137,15 @@ class Event extends Model
     public function getImageUrlAttribute(): string
     {
         return $this->banner_url;
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(EventCertificate::class)->orderBy('participant_name');
+    }
+
+    public function activeCertificates(): HasMany
+    {
+        return $this->hasMany(EventCertificate::class)->where('is_published', true)->orderBy('participant_name');
     }
 }

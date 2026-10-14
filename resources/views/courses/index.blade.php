@@ -18,8 +18,9 @@
                 <div class="lg:col-span-7">
                     <!-- SEO Breadcrumbs -->
                     @php
+                        $isTeacher = $isTeacherTrack ?? false;
                         $courseIndexBreadcrumbs = [
-                            ['label' => 'Courses', 'url' => $selectedCategory ? route('courses.index') : null],
+                            ['label' => $isTeacher ? 'Teacher Training' : 'Courses', 'url' => $selectedCategory ? ($isTeacher ? route('teacher-training.index') : route('courses.index')) : null],
                         ];
                         if ($selectedCategory) {
                             $courseIndexBreadcrumbs[] = ['label' => $selectedCategory->name];
@@ -32,7 +33,7 @@
                     <div class="flex items-center gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-400 uppercase tracking-wider border border-amber-500/30">
                             <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            {{ $selectedCategory ? 'Specialized Domain' : 'Academic Catalog' }}
+                            {{ $isTeacher ? 'Teacher Training Track (TTC)' : ($selectedCategory ? 'Specialized Domain' : 'Academic Catalog') }}
                         </span>
                         @if($selectedCategory)
                             <span class="text-sm text-slate-300 font-medium">
@@ -42,15 +43,27 @@
                     </div>
 
                     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-                        @if($selectedCategory)
-                            <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">{{ $selectedCategory->name }}</span> Programs
+                        @if($isTeacher)
+                            @if($selectedCategory)
+                                <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">{{ $selectedCategory->name }}</span> Teacher Training (TTC)
+                            @else
+                                Explore <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">Teacher Training (TTC)</span> Programs
+                            @endif
                         @else
-                            Explore All <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">Skill Programs</span>
+                            @if($selectedCategory)
+                                <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">{{ $selectedCategory->name }}</span> Programs
+                            @else
+                                Explore All <span class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">Skill Programs</span>
+                            @endif
                         @endif
                     </h1>
 
                     <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-                        {{ $selectedCategory ? $selectedCategory->description : 'Discover structured, accredited programs designed to cultivate mental agility, computational confidence, creative excellence, and future-ready capabilities for all ages.' }}
+                        @if($isTeacher)
+                            {{ $selectedCategory ? "Accredited educator certification and teacher training programs in {$selectedCategory->name}. Master global pedagogy, hands-on demonstration kits, and start your own academy." : 'Empowering passionate educators, school teachers, and career seekers with ISO 9001 accredited pedagogical certifications, complete lesson kits, and zero-royalty coaching models.' }}
+                        @else
+                            {{ $selectedCategory ? $selectedCategory->description : 'Discover structured, accredited programs designed to cultivate mental agility, computational confidence, creative excellence, and future-ready capabilities for all ages.' }}
+                        @endif
                     </p>
 
                     <!-- Trust Points / Highlights Strip -->
@@ -142,7 +155,7 @@
                     <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
                         <!-- All Categories Pill -->
                         <a 
-                            href="{{ route('courses.index', request()->except(['page'])) }}" 
+                            href="{{ ($isTeacherTrack ?? false) ? route('teacher-training.index', request()->except(['page'])) : route('courses.index', request()->except(['page'])) }}" 
                             class="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all {{ !$selectedCategory ? 'bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/20' : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900' }}"
                         >
                             <i class="fa-solid fa-layer-group text-sm"></i>
@@ -155,9 +168,12 @@
                         @foreach($categories as $category)
                             @php
                                 $isActive = $selectedCategory && $selectedCategory->id === $category->id;
+                                $categoryRoute = ($isTeacherTrack ?? false)
+                                    ? route('teacher-training.category', array_merge(['slug' => $category->slug], request()->except(['page'])))
+                                    : route('courses.category', array_merge(['slug' => $category->slug], request()->except(['page'])));
                             @endphp
                             <a 
-                                href="{{ route('courses.category', array_merge(['slug' => $category->slug], request()->except(['page']))) }}" 
+                                href="{{ $categoryRoute }}" 
                                 class="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all {{ $isActive ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-sm shadow-amber-500/25 ring-2 ring-amber-400/50' : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900' }}"
                             >
                                 <i class="{{ $category->display_icon }} text-sm"></i>
@@ -172,7 +188,12 @@
             @endif
 
             <!-- Tier 2: Search, Filters & Quick Metrics Bar -->
-            <form action="{{ $selectedCategory ? route('courses.category', $selectedCategory->slug) : route('courses.index') }}" method="GET" class="py-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            @php
+                $filterFormAction = ($isTeacherTrack ?? false)
+                    ? ($selectedCategory ? route('teacher-training.category', $selectedCategory->slug) : route('teacher-training.index'))
+                    : ($selectedCategory ? route('courses.category', $selectedCategory->slug) : route('courses.index'));
+            @endphp
+            <form action="{{ $filterFormAction }}" method="GET" class="py-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 
                 <!-- Left: Results Count & Active Filter Tags -->
                 <div class="flex items-center gap-2 text-xs text-slate-600 flex-wrap">
@@ -183,7 +204,7 @@
                     @if(request('mode'))
                         <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
                             <span>Mode: {{ request('mode') }}</span>
-                            <a href="{{ $selectedCategory ? route('courses.category', array_merge(['slug' => $selectedCategory->slug], request()->except(['mode', 'page']))) : route('courses.index', request()->except(['mode', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
+                            <a href="{{ $filterFormAction . '?' . http_build_query(request()->except(['mode', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
                                 <i class="fa-solid fa-xmark text-[10px]"></i>
                             </a>
                         </span>
@@ -194,7 +215,7 @@
                             <span>
                                 @if(request('age') == 5) Ages 4-6 @elseif(request('age') == 9) Ages 7-12 @else Ages 13+ @endif
                             </span>
-                            <a href="{{ $selectedCategory ? route('courses.category', array_merge(['slug' => $selectedCategory->slug], request()->except(['age', 'page']))) : route('courses.index', request()->except(['age', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
+                            <a href="{{ $filterFormAction . '?' . http_build_query(request()->except(['age', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
                                 <i class="fa-solid fa-xmark text-[10px]"></i>
                             </a>
                         </span>
@@ -203,7 +224,7 @@
                     @if(request('search'))
                         <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
                             <span>"{{ request('search') }}"</span>
-                            <a href="{{ $selectedCategory ? route('courses.category', array_merge(['slug' => $selectedCategory->slug], request()->except(['search', 'page']))) : route('courses.index', request()->except(['search', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
+                            <a href="{{ $filterFormAction . '?' . http_build_query(request()->except(['search', 'page'])) }}" class="hover:text-amber-950 ml-0.5">
                                 <i class="fa-solid fa-xmark text-[10px]"></i>
                             </a>
                         </span>
@@ -212,6 +233,24 @@
 
                 <!-- Right: Dropdowns + Search Input + Reset -->
                 <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                    <!-- Target Audience Switcher -->
+                    <div class="relative w-full sm:w-auto">
+                        <select 
+                            name="audience" 
+                            onchange="this.form.submit()" 
+                            class="w-full sm:w-auto appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-8.5 pr-8 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100/70 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition cursor-pointer"
+                        >
+                            <option value="student" {{ ($selectedAudience ?? 'student') === 'student' ? 'selected' : '' }}>Students Programs</option>
+                            <option value="teacher" {{ ($selectedAudience ?? 'student') === 'teacher' ? 'selected' : '' }}>Teachers Programs (TTC)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                            <i class="{{ ($isTeacherTrack ?? false) ? 'fa-solid fa-chalkboard-user text-amber-600' : 'fa-solid fa-graduation-cap' }} text-sm"></i>
+                        </div>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+
                     <!-- Learning Mode -->
                     <div class="relative w-full sm:w-auto">
                         <select 

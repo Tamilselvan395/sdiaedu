@@ -44,6 +44,21 @@ class CoursesTable
                     ->badge()
                     ->label('Category'),
 
+                TextColumn::make('target_audience')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state?->value ?? (string) $state) {
+                        'teacher' => 'success',
+                        'both' => 'info',
+                        default => 'primary',
+                    })
+                    ->formatStateUsing(fn ($state): string => match ($state?->value ?? (string) $state) {
+                        'teacher' => 'Teachers',
+                        'both' => 'Both',
+                        default => 'Students',
+                    })
+                    ->label('Audience')
+                    ->sortable(),
+
                 TextColumn::make('mode')
                     ->badge(),
 
@@ -51,8 +66,7 @@ class CoursesTable
                     ->sortable(),
 
                 TextColumn::make('fee')
-                    ->numeric()
-                    ->prefix('₹')
+                    ->formatStateUsing(fn ($state): string => $state !== null ? '₹'.number_format((float) $state) : '-')
                     ->sortable(),
 
                 IconColumn::make('is_active')
@@ -72,6 +86,14 @@ class CoursesTable
                 SelectFilter::make('course_category_id')
                     ->relationship('category', 'name')
                     ->label('Category'),
+
+                SelectFilter::make('target_audience')
+                    ->options([
+                        'student' => 'Students',
+                        'teacher' => 'Teachers',
+                        'both' => 'Both',
+                    ])
+                    ->label('Audience'),
 
                 SelectFilter::make('mode')
                     ->options(CourseMode::class),

@@ -120,14 +120,14 @@
                         Home
                     </a>
 
-                    <!-- Courses Dropdown / Mega Menu -->
+                    <!-- Students Dropdown / Mega Menu -->
                     <div class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
-                        <a href="{{ route('courses.index') }}" class="inline-flex items-center gap-1.5 hover:text-amber-600 transition py-2 {{ request()->routeIs('courses.*') ? 'text-amber-600' : '' }}">
-                            <span>All Programs</span>
+                        <a href="{{ route('courses.index', ['audience' => 'student']) }}" class="inline-flex items-center gap-1.5 hover:text-amber-600 transition py-2 {{ request()->routeIs('courses.*') && request()->query('audience') !== 'teacher' ? 'text-amber-600' : '' }}">
+                            <span>Students</span>
                             <i class="fa-solid fa-chevron-down text-[11px] transition group-hover:rotate-180"></i>
                         </a>
 
-                        <!-- Mega Dropdown Menu -->
+                        <!-- Mega Dropdown Menu for Students -->
                         <div 
                             x-show="open" 
                             x-transition:enter="transition ease-out duration-200"
@@ -147,10 +147,10 @@
                                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                                         <span>5 Core Academic &amp; Skill Domains</span>
                                         <i class="fa-solid fa-circle text-[4px] text-slate-400"></i>
-                                        <span>25 Specialized Courses</span>
+                                        <span>25 Student Courses</span>
                                     </span>
                                 </div>
-                                <a href="{{ route('courses.index') }}" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                                <a href="{{ route('courses.index', ['audience' => 'student']) }}" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
                                     <span>Full Directory</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </a>
@@ -158,7 +158,7 @@
 
                             <!-- 5 Columns Grid -->
                             <div class="grid grid-cols-5 gap-4">
-                                @foreach($navCategories ?? [] as $category)
+                                @foreach($navStudentCategories ?? ($navCategories ?? []) as $category)
                                     @php
                                         $catSlug = data_get($category, 'slug');
                                         $catName = data_get($category, 'name');
@@ -204,11 +204,11 @@
                                 <div class="flex items-center gap-4 text-slate-600">
                                     <span class="inline-flex items-center gap-1.5 font-medium">
                                         <i class="fa-solid fa-certificate text-amber-500"></i>
-                                        Government & Academy Certified
+                                        Government &amp; Academy Certified
                                     </span>
                                     <span class="inline-flex items-center gap-1.5 font-medium">
                                         <i class="fa-solid fa-user-check text-emerald-600"></i>
-                                        Small Batch Sizes
+                                        Small Batch Sizes (1:8)
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -216,8 +216,118 @@
                                         <span>Free Skill Quiz</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
-                                    <a href="{{ route('courses.index') }}" class="font-bold text-amber-600 hover:text-amber-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs hover:border-amber-300 transition flex items-center gap-1.5">
-                                        <span>Browse All 25+ Courses</span>
+                                    <a href="{{ route('courses.index', ['audience' => 'student']) }}" class="font-bold text-amber-600 hover:text-amber-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs hover:border-amber-300 transition flex items-center gap-1.5">
+                                        <span>Browse All Student Courses</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teachers Dropdown / Mega Menu -->
+                    <div class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                        <a href="{{ route('teacher-training.index') }}" class="inline-flex items-center gap-1.5 hover:text-amber-600 transition py-2 {{ request()->routeIs('teacher-training.*') ? 'text-amber-600' : '' }}">
+                            <span>Teachers</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">TTC</span>
+                            <i class="fa-solid fa-chevron-down text-[11px] transition group-hover:rotate-180"></i>
+                        </a>
+
+                        <!-- Mega Dropdown Menu for Teachers -->
+                        <div 
+                            x-show="open" 
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-y-2"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 translate-y-2"
+                            class="absolute top-full -left-48 lg:-left-64 w-[860px] xl:w-[960px] rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 ring-1 ring-slate-900/5 z-50 max-h-[85vh] overflow-y-auto"
+                            x-cloak
+                        >
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 text-xs">
+                                        <i class="fa-solid fa-chalkboard-user"></i>
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                        <span>5 Specialized TTC Domains</span>
+                                        <i class="fa-solid fa-circle text-[4px] text-slate-400"></i>
+                                        <span>23 Teacher Training Programs</span>
+                                    </span>
+                                </div>
+                                <a href="{{ route('teacher-training.index') }}" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                                    <span>Full Directory</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+
+                            <!-- 5 Columns Grid for Teacher Categories -->
+                            <div class="grid grid-cols-5 gap-4">
+                                @foreach($navTeacherCategories ?? [] as $category)
+                                    @php
+                                        $catSlug = data_get($category, 'slug');
+                                        $catName = data_get($category, 'name');
+                                        $catIcon = data_get($category, 'icon', 'fa-solid fa-chalkboard-user');
+                                        $catCourses = data_get($category, 'courses', []);
+                                    @endphp
+                                    @continue(empty($catSlug))
+                                    <div class="space-y-2.5">
+                                        <a 
+                                            href="{{ route('teacher-training.category', $catSlug) }}" 
+                                            class="group/cat block p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                                        >
+                                            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900 group-hover/cat:text-amber-600 transition">
+                                                <i class="{{ $catIcon }} text-[11px] text-amber-500"></i>
+                                                <span class="truncate leading-tight">{{ $catName }}</span>
+                                            </div>
+                                            <div class="text-[10px] text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                                                <span>{{ count($catCourses) }} Programs</span>
+                                                <i class="fa-solid fa-arrow-right text-[9px] text-amber-500"></i>
+                                            </div>
+                                        </a>
+
+                                        <ul class="space-y-1 pl-1">
+                                            @foreach($catCourses as $course)
+                                                <li>
+                                                    <a 
+                                                        href="{{ route('courses.show', $course['slug']) }}" 
+                                                        class="flex items-center gap-1.5 text-xs text-slate-600 hover:text-amber-600 hover:font-semibold py-1 px-1.5 rounded-lg hover:bg-amber-50/60 transition group/link"
+                                                        title="{{ $course['title'] }}"
+                                                    >
+                                                        <i class="fa-solid fa-circle text-[4px] text-slate-300 group-hover/link:text-amber-500"></i>
+                                                        <span class="truncate leading-snug">{{ $course['title'] }}</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Bottom Quick-Access Bar for Teachers -->
+                            <div class="border-t border-slate-100 mt-5 pt-3.5 flex items-center justify-between bg-slate-50 -mx-6 -mb-6 p-4 rounded-b-3xl text-xs">
+                                <div class="flex items-center gap-4 text-slate-600">
+                                    <span class="inline-flex items-center gap-1.5 font-medium">
+                                        <i class="fa-solid fa-award text-amber-500"></i>
+                                        ISO 9001 Accredited TTC
+                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 font-medium">
+                                        <i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i>
+                                        Zero Royalty Model
+                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 font-medium">
+                                        <i class="fa-solid fa-toolbox text-blue-600"></i>
+                                        Complete Teaching Kits
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('pages.franchise') }}" class="font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1">
+                                        <span>Start Academy</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                    <a href="{{ route('teacher-training.index') }}" class="font-bold text-amber-600 hover:text-amber-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs hover:border-amber-300 transition flex items-center gap-1.5">
+                                        <span>Browse All 23 Teacher Courses</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
                                 </div>
@@ -232,10 +342,6 @@
 
                     <a href="{{ route('events.index') }}" class="hover:text-amber-600 transition {{ request()->routeIs('events.*') ? 'text-amber-600' : '' }}">
                         Events
-                    </a>
-
-                    <a href="{{ route('blog.index') }}" class="hover:text-amber-600 transition {{ request()->routeIs('blog.*') ? 'text-amber-600' : '' }}">
-                        Articles
                     </a>
 
                     <a href="{{ route('pages.verify-certificate') }}" class="hover:text-amber-600 transition {{ request()->routeIs('pages.verify-certificate') ? 'text-amber-600' : '' }}">
@@ -353,30 +459,30 @@
                                 <span>Home</span>
                             </a>
 
-                            <!-- Courses Accordion -->
-                            <div x-data="{ expanded: {{ request()->routeIs('courses.*') ? 'true' : 'false' }} }" class="space-y-1">
+                            <!-- Students Accordion -->
+                            <div x-data="{ expanded: {{ request()->routeIs('courses.*') && request()->query('audience') !== 'teacher' ? 'true' : 'false' }} }" class="space-y-1">
                                 <div 
-                                    class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-800 hover:bg-amber-50 hover:text-amber-700 transition cursor-pointer {{ request()->routeIs('courses.*') ? 'bg-amber-50/70 text-amber-700' : '' }}" 
+                                    class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-800 hover:bg-amber-50 hover:text-amber-700 transition cursor-pointer {{ request()->routeIs('courses.*') && request()->query('audience') !== 'teacher' ? 'bg-amber-50/70 text-amber-700' : '' }}" 
                                     @click="expanded = !expanded"
                                 >
                                     <div class="flex items-center gap-3">
                                         <i class="fa-solid fa-graduation-cap w-5 text-center text-slate-400"></i>
-                                        <span>All Programs & Courses</span>
+                                        <span>Students Programs</span>
                                     </div>
                                     <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="{ 'rotate-180': expanded }"></i>
                                 </div>
 
                                 <div x-show="expanded" x-cloak class="pl-3 pr-1 py-1 space-y-2 border-l-2 border-amber-300 ml-4">
                                     <a 
-                                        href="{{ route('courses.index') }}" 
+                                        href="{{ route('courses.index', ['audience' => 'student']) }}" 
                                         @click="mobileMenuOpen = false"
                                         class="flex items-center justify-between rounded-lg px-3 py-1.5 text-xs font-bold text-amber-600 hover:bg-amber-50 transition"
                                     >
-                                        <span>Browse All 25+ Courses Directory</span>
+                                        <span>Browse All 25 Student Courses</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
                                     
-                                    @foreach($navCategories ?? [] as $category)
+                                    @foreach($navStudentCategories ?? ($navCategories ?? []) as $category)
                                         @php
                                             $catSlug = data_get($category, 'slug');
                                             $catName = data_get($category, 'name');
@@ -426,6 +532,82 @@
                                 </div>
                             </div>
 
+                            <!-- Teachers Accordion -->
+                            <div x-data="{ expanded: {{ request()->routeIs('teacher-training.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                <div 
+                                    class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-800 hover:bg-amber-50 hover:text-amber-700 transition cursor-pointer {{ request()->routeIs('teacher-training.*') ? 'bg-amber-50/70 text-amber-700' : '' }}" 
+                                    @click="expanded = !expanded"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-chalkboard-user w-5 text-center text-slate-400"></i>
+                                        <span>Teachers Programs</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">23 TTC</span>
+                                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="{ 'rotate-180': expanded }"></i>
+                                    </div>
+                                </div>
+
+                                <div x-show="expanded" x-cloak class="pl-3 pr-1 py-1 space-y-2 border-l-2 border-emerald-400 ml-4">
+                                    <a 
+                                        href="{{ route('teacher-training.index') }}" 
+                                        @click="mobileMenuOpen = false"
+                                        class="flex items-center justify-between rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition"
+                                    >
+                                        <span>Browse All 23 Teacher TTC Courses</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+
+                                    @foreach($navTeacherCategories ?? [] as $category)
+                                        @php
+                                            $catSlug = data_get($category, 'slug');
+                                            $catName = data_get($category, 'name');
+                                            $catIcon = data_get($category, 'icon', 'fa-solid fa-chalkboard-user');
+                                            $catCourses = data_get($category, 'courses', []);
+                                            $catCount = count($catCourses);
+                                        @endphp
+                                        @continue(empty($catSlug))
+                                        <div x-data="{ openCat: false }" class="rounded-xl border border-slate-100 overflow-hidden bg-slate-50/50">
+                                            <button 
+                                                type="button" 
+                                                @click="openCat = !openCat"
+                                                class="w-full flex items-center justify-between p-2.5 text-left text-xs font-bold text-slate-800 hover:bg-amber-50/50 transition cursor-pointer"
+                                            >
+                                                <div class="flex items-center gap-2 truncate pr-2">
+                                                    <i class="{{ $catIcon }} text-[11px] text-amber-500 w-4 text-center"></i>
+                                                    <span class="truncate">{{ $catName }}</span>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                                    <span class="text-[10px] text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded-full font-semibold">{{ $catCount }}</span>
+                                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': openCat }"></i>
+                                                </div>
+                                            </button>
+
+                                            <div x-show="openCat" x-cloak class="p-2 pt-0 space-y-1 bg-white border-t border-slate-100">
+                                                <a 
+                                                    href="{{ route('teacher-training.category', $catSlug) }}" 
+                                                    @click="mobileMenuOpen = false"
+                                                    class="flex items-center justify-between text-[11px] font-bold text-amber-600 hover:underline px-2 py-1"
+                                                >
+                                                    <span>View {{ $catName }} TTC</span>
+                                                    <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                                </a>
+                                                @foreach($catCourses as $course)
+                                                    <a 
+                                                        href="{{ route('courses.show', $course['slug']) }}" 
+                                                        @click="mobileMenuOpen = false"
+                                                        class="flex items-center gap-2 rounded-lg px-2 py-1 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition"
+                                                    >
+                                                        <i class="fa-solid fa-circle text-[4px] text-slate-300"></i>
+                                                        <span class="truncate">{{ $course['title'] }}</span>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <a 
                                 href="{{ route('pages.assessment') }}" 
                                 @click="mobileMenuOpen = false"
@@ -456,15 +638,6 @@
                             >
                                 <i class="fa-solid fa-landmark w-5 text-center text-slate-400"></i>
                                 <span>About Academy</span>
-                            </a>
-
-                            <a 
-                                href="{{ route('blog.index') }}" 
-                                @click="mobileMenuOpen = false"
-                                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-800 hover:bg-amber-50 hover:text-amber-700 transition {{ request()->routeIs('blog.*') ? 'bg-amber-50 text-amber-600 font-bold' : '' }}"
-                            >
-                                <i class="fa-solid fa-newspaper w-5 text-center text-slate-400"></i>
-                                <span>Articles & Guides</span>
                             </a>
 
                             <a 

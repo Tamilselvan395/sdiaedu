@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CourseAudience;
 use App\Enums\CourseMode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class Course extends Model
     protected function casts(): array
     {
         return [
+            'target_audience' => CourseAudience::class,
             'curriculum' => 'array',
             'learning_outcomes' => 'array',
             'who_is_for' => 'array',
@@ -99,6 +101,30 @@ class Course extends Model
         return $query->where('is_featured', true);
     }
 
+    public function scopeForStudents($query)
+    {
+        return $query->whereIn('target_audience', ['student', 'both']);
+    }
+
+    public function scopeForTeachers($query)
+    {
+        return $query->whereIn('target_audience', ['teacher', 'both']);
+    }
+
+    public function isForStudents(): bool
+    {
+        $aud = $this->target_audience instanceof CourseAudience ? $this->target_audience->value : (string) ($this->target_audience ?? 'student');
+
+        return in_array($aud, ['student', 'both', '']);
+    }
+
+    public function isForTeachers(): bool
+    {
+        $aud = $this->target_audience instanceof CourseAudience ? $this->target_audience->value : (string) ($this->target_audience ?? '');
+
+        return in_array($aud, ['teacher', 'both']);
+    }
+
     public function getAgeRangeAttribute(): string
     {
         if ($this->age_min && $this->age_max) {
@@ -136,8 +162,10 @@ class Course extends Model
             'handwriting' => 'handwriting.svg',
             'calligraphy' => 'calligraphy.svg',
             'rubiks-cube' => 'rubiks-cube.svg',
+            'rubiks' => 'rubiks-cube.svg',
             'drawing' => 'drawing.svg',
             'painting-and-colouring' => 'painting-and-colouring.svg',
+            'painting' => 'painting-and-colouring.svg',
             'pencil-art' => 'pencil-art.svg',
             'art-and-craft' => 'art-and-craft.svg',
             'zumba' => 'zumba.svg',
@@ -155,6 +183,13 @@ class Course extends Model
 
         if (isset($aliasMap[$this->slug]) && file_exists(public_path('images/courses/'.$aliasMap[$this->slug]))) {
             return asset('images/courses/'.$aliasMap[$this->slug]);
+        }
+
+        // Check if slug contains key from aliasMap
+        foreach ($aliasMap as $key => $file) {
+            if (str_contains($this->slug, $key) && file_exists(public_path('images/courses/'.$file))) {
+                return asset('images/courses/'.$file);
+            }
         }
 
         if (file_exists(public_path('images/courses/default.svg'))) {

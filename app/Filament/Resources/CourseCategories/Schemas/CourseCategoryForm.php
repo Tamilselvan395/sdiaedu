@@ -62,9 +62,20 @@ class CourseCategoryForm
                                 ]),
 
                             Section::make('Publishing & Visibility')
-                                ->description('Control visibility and ordering on the public website.')
+                                ->description('Control audience track, visibility, and ordering on the public website.')
                                 ->schema([
-                                    Grid::make(2)->schema([
+                                    Grid::make(3)->schema([
+                                        Select::make('target_audience')
+                                            ->label('Target Audience / Track')
+                                            ->options([
+                                                'student' => 'Students Only',
+                                                'teacher' => 'Teachers (Teacher Training TTC) Only',
+                                                'both' => 'Both (Students & Teachers)',
+                                            ])
+                                            ->default('both')
+                                            ->required()
+                                            ->helperText('Select whether this category belongs to student courses, teacher training (TTC), or both.'),
+
                                         Toggle::make('is_active')
                                             ->label('Active / Published')
                                             ->default(true)

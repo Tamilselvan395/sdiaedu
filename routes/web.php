@@ -23,6 +23,12 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 Route::get('/courses/category/{slug}', [CourseController::class, 'category'])->name('courses.category');
 Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');
 
+// Teacher Training Programs (Clean SEO-friendly URLs)
+Route::get('/teacher-training', [CourseController::class, 'teacherIndex'])->name('teacher-training.index');
+Route::get('/teacher-training/category/{slug}', [CourseController::class, 'teacherCategory'])->name('teacher-training.category');
+Route::get('/teachers', fn () => redirect()->route('teacher-training.index', [], 301));
+Route::get('/teachers/category/{slug}', fn ($slug) => redirect()->route('teacher-training.category', ['slug' => $slug], 301));
+
 // Enquiries / Lead capture
 Route::post('/enquiries', [EnquiryController::class, 'store'])->name('enquiries.store');
 
@@ -36,6 +42,7 @@ Route::get('/skill-assessment', [PageController::class, 'assessment'])->name('pa
 // Academy Events & Championships
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('/events/{slug}/certificates/{certificate}/download', [EventController::class, 'downloadCertificate'])->name('events.certificates.download');
 
 // Institutional Pages
 Route::get('/about', [PageController::class, 'about'])->name('pages.about');

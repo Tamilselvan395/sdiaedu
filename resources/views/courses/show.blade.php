@@ -101,9 +101,16 @@
                         <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
                             Mode: {{ $course->mode->value ?? 'Flexible' }}
                         </span>
-                        <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/30">
-                            Ages {{ $course->age_range }}
-                        </span>
+                        @if($course->isForTeachers() && !$course->isForStudents())
+                            <span class="rounded-full bg-amber-500/25 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-400/40 inline-flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-chalkboard-user text-xs"></i>
+                                Teacher Training Program (TTC)
+                            </span>
+                        @else
+                            <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/30">
+                                Ages {{ $course->age_range }}
+                            </span>
+                        @endif
                     </div>
 
                     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
@@ -121,7 +128,13 @@
                         </div>
                         <div>
                             <span class="block text-sm text-slate-400">Target Learners</span>
-                            <span class="font-bold text-white">{{ $course->age_range }}</span>
+                            <span class="font-bold text-white">
+                                @if($course->isForTeachers() && !$course->isForStudents())
+                                    Educators, Teachers &amp; Tutors
+                                @else
+                                    {{ $course->age_range }}
+                                @endif
+                            </span>
                         </div>
                         <div>
                             <span class="block text-sm text-slate-400">Awarded Credential</span>
@@ -401,6 +414,7 @@
                     </div>
 
                     <!-- 6. Course for Students -->
+                    @if($course->isForStudents())
                     <div class="rounded-3xl bg-white p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
                         <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-indigo-800 border border-indigo-200/60">
                             <i class="fa-solid fa-child"></i>
@@ -469,9 +483,10 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- 7. Course for Teachers & Educators -->
-                    @if($course->has_teacher_training ?? true)
+                    @if($course->isForTeachers())
                     <div class="rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-50/60 to-white p-6 sm:p-8 border-2 border-amber-300/80 shadow-md space-y-6">
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <div class="inline-flex items-center gap-2 rounded-full bg-amber-500 text-slate-950 px-3.5 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
@@ -557,33 +572,56 @@
                                 Frequently Asked Questions
                             </h2>
                             <p class="text-sm text-slate-600 mt-1">
-                                Clear answers about class schedules, batch formats, student tracks, teacher training, and certification.
+                                @if($course->isForTeachers() && !$course->isForStudents())
+                                    Clear answers about educator schedules, teacher certification, syllabus kits, and center startup.
+                                @else
+                                    Clear answers about class schedules, batch formats, student trials, and certification.
+                                @endif
                             </p>
                         </div>
 
                         @php
-                            $faqs = $course->faqs->count() > 0 ? $course->faqs->toArray() : [
-                                [
-                                    'question' => 'What is the ideal age group for this course?',
-                                    'answer' => 'This course is tailored for learners aged ' . ($course->age_range ?? '5 - 15 years') . '. Prior experience is not required; each student begins with foundational modules.'
-                                ],
-                                [
-                                    'question' => 'Is this course offered in both Student and Teacher Training formats?',
-                                    'answer' => 'Yes! We run separate batches: one for young students focused on cognitive mastery and school excellence, and another dedicated Teacher Training Track (TTC) for educators and tutors seeking certified trainer credentials.'
-                                ],
-                                [
-                                    'question' => 'How are the classes scheduled?',
-                                    'answer' => $course->class_schedule ?? 'Classes are scheduled flexibly with weekend options (2 hours/session) or weekday evening batches (1 hour, twice a week).'
-                                ],
-                                [
-                                    'question' => 'Can learners switch between Campus (Chennai) and Online batches?',
-                                    'answer' => 'Yes, our hybrid infrastructure allows seamless switching between in-person classroom sessions at our Chennai campus and live interactive online sessions.'
-                                ],
-                                [
-                                    'question' => 'How is the graduation certificate verified?',
-                                    'answer' => 'Every graduating student receives an official certificate with a tamper-proof QR code and unique credential ID verifiable 24/7 on our public verification portal.'
+                            $faqs = $course->faqs->count() > 0 ? $course->faqs->toArray() : (
+                                $course->isForTeachers() && !$course->isForStudents() ? [
+                                    [
+                                        'question' => 'Who is eligible to join this Teacher Training Program?',
+                                        'answer' => 'Graduates, school teachers, educated homemakers, and career seekers looking to start their own coaching center or enhance their professional teaching credentials.'
+                                    ],
+                                    [
+                                        'question' => 'Do I receive teaching kits and student syllabus materials?',
+                                        'answer' => 'Yes! Every enrolled educator receives complete master demonstration kits, graded student workbooks, lesson agendas, and question paper banks.'
+                                    ],
+                                    [
+                                        'question' => 'How are the teacher training batches scheduled?',
+                                        'answer' => $course->class_schedule ?? 'Flexible weekend batches (Saturday & Sunday) and intensive evening sessions designed specifically for working adults.'
+                                    ],
+                                    [
+                                        'question' => 'Are there any recurring royalty or franchise fees to run batches?',
+                                        'answer' => 'No! Sri Deekshaa provides an open certification model without recurring royalties, empowering you to independently run your tuition batches or academy.'
+                                    ],
+                                    [
+                                        'question' => 'How is the Teacher Training certificate verified?',
+                                        'answer' => 'Graduates receive an ISO 9001 accredited qualification with an instant QR-code verification link verifiable 24/7 on our public verification portal.'
+                                    ]
+                                ] : [
+                                    [
+                                        'question' => 'What is the ideal age group for this course?',
+                                        'answer' => 'This course is tailored for learners aged ' . ($course->age_range ?? '5 - 15 years') . '. Prior experience is not required; each student begins with foundational modules.'
+                                    ],
+                                    [
+                                        'question' => 'How are the classes scheduled?',
+                                        'answer' => $course->class_schedule ?? 'Classes are scheduled flexibly with weekend options (2 hours/session) or weekday evening batches (1 hour, twice a week).'
+                                    ],
+                                    [
+                                        'question' => 'Can learners switch between Campus (Chennai) and Online batches?',
+                                        'answer' => 'Yes, our hybrid infrastructure allows seamless switching between in-person classroom sessions at our Chennai campus and live interactive online sessions.'
+                                    ],
+                                    [
+                                        'question' => 'How is the graduation certificate verified?',
+                                        'answer' => 'Every graduating student receives an official certificate with a tamper-proof QR code and unique credential ID verifiable 24/7 on our public verification portal.'
+                                    ]
                                 ]
-                            ];
+                            );
                         @endphp
 
                         <div class="space-y-3" x-data="{ activeFaq: null }">
@@ -637,24 +675,42 @@
 
                             <!-- Actions -->
                             <div class="space-y-2.5">
-                                <button 
-                                    type="button"
-                                    @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Student Track)' })"
-                                    class="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-4 text-sm text-center shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                                >
-                                    <i class="fa-solid fa-child text-sm"></i>
-                                    <span>Book Free Student Trial</span>
-                                </button>
+                                @if($course->isForTeachers() && !$course->isForStudents())
+                                    <button 
+                                        type="button"
+                                        @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Teacher Training Track)' })"
+                                        class="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-4 text-sm text-center shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                                    >
+                                        <i class="fa-solid fa-chalkboard-user text-sm"></i>
+                                        <span>Inquire for Teacher Training</span>
+                                    </button>
+                                @elseif($course->isForStudents() && !$course->isForTeachers())
+                                    <button 
+                                        type="button"
+                                        @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Student Track)' })"
+                                        class="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-4 text-sm text-center shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                                    >
+                                        <i class="fa-solid fa-child text-sm"></i>
+                                        <span>Book Free Student Trial</span>
+                                    </button>
+                                @else
+                                    <button 
+                                        type="button"
+                                        @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Student Track)' })"
+                                        class="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-4 text-sm text-center shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                                    >
+                                        <i class="fa-solid fa-child text-sm"></i>
+                                        <span>Book Free Student Trial</span>
+                                    </button>
 
-                                @if($course->has_teacher_training ?? true)
-                                <button 
-                                    type="button"
-                                    @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Teacher Training Track)' })"
-                                    class="w-full rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold py-2.5 px-4 text-sm text-center transition cursor-pointer flex items-center justify-center gap-2"
-                                >
-                                    <i class="fa-solid fa-certificate text-amber-600 text-sm"></i>
-                                    <span>Teacher Training Track (TTC)</span>
-                                </button>
+                                    <button 
+                                        type="button"
+                                        @click="$dispatch('open-enquiry-modal', { course_id: '{{ $course->id }}', course_title: '{{ addslashes($course->title) }} (Teacher Training Track)' })"
+                                        class="w-full rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold py-2.5 px-4 text-sm text-center transition cursor-pointer flex items-center justify-center gap-2"
+                                    >
+                                        <i class="fa-solid fa-certificate text-amber-600 text-sm"></i>
+                                        <span>Teacher Training Track (TTC)</span>
+                                    </button>
                                 @endif
 
                                 <x-whatsapp-btn 
@@ -676,22 +732,34 @@
                                     <input type="hidden" name="source" value="Course Detail Page ({{ $course->slug }})">
 
                                     <div class="space-y-1">
-                                        <select 
-                                            name="notes" 
-                                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500"
-                                        >
-                                            <option value="Inquiry for Student Track: {{ $course->title }}">Student Track (Ages {{ $course->age_range }})</option>
-                                            @if($course->has_teacher_training ?? true)
+                                        @if($course->isForTeachers() && !$course->isForStudents())
+                                            <input type="hidden" name="notes" value="Inquiry for Teacher Training Track (TTC): {{ $course->title }}">
+                                            <div class="rounded-xl bg-amber-50 border border-amber-200/80 px-3.5 py-2 text-xs font-semibold text-amber-900 flex items-center gap-2">
+                                                <i class="fa-solid fa-certificate text-amber-600"></i>
+                                                <span>Teacher Training Track (TTC) Program</span>
+                                            </div>
+                                        @elseif($course->isForStudents() && !$course->isForTeachers())
+                                            <input type="hidden" name="notes" value="Inquiry for Student Track: {{ $course->title }}">
+                                            <div class="rounded-xl bg-indigo-50 border border-indigo-200/80 px-3.5 py-2 text-xs font-semibold text-indigo-900 flex items-center gap-2">
+                                                <i class="fa-solid fa-child text-indigo-600"></i>
+                                                <span>Student Track (Ages {{ $course->age_range }})</span>
+                                            </div>
+                                        @else
+                                            <select 
+                                                name="notes" 
+                                                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500"
+                                            >
+                                                <option value="Inquiry for Student Track: {{ $course->title }}">Student Track (Ages {{ $course->age_range }})</option>
                                                 <option value="Inquiry for Teacher Training Track (TTC): {{ $course->title }}">Teacher Training Track (TTC)</option>
-                                            @endif
-                                        </select>
+                                            </select>
+                                        @endif
                                     </div>
 
                                     <input 
                                         type="text" 
                                         name="parent_name" 
                                         required 
-                                        placeholder="Your Name *" 
+                                        placeholder="{{ $course->isForTeachers() && !$course->isForStudents() ? 'Your Full Name *' : 'Parent / Student Name *' }}" 
                                         class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500"
                                     >
 

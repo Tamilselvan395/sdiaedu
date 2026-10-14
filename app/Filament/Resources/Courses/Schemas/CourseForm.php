@@ -38,17 +38,29 @@ class CourseForm
                             Section::make('Hero Header & Core Information')
                                 ->description('Configure top hero header elements displayed on the course page.')
                                 ->schema([
-                                    Grid::make(2)->schema([
+                                    Grid::make(3)->schema([
                                         Select::make('course_category_id')
                                             ->relationship('category', 'name')
                                             ->required()
                                             ->label('Course Category (Domain Badge)'),
 
+                                        Select::make('target_audience')
+                                            ->options([
+                                                'student' => 'Students',
+                                                'teacher' => 'Teachers (Teacher Training)',
+                                                'both' => 'Both (Students & Teachers)',
+                                            ])
+                                            ->default('student')
+                                            ->required()
+                                            ->label('Target Audience (Student / Teacher)'),
+
                                         Select::make('mode')
                                             ->options(CourseMode::class)
                                             ->required()
                                             ->label('Learning Mode (Campus, Online, Hybrid)'),
+                                    ]),
 
+                                    Grid::make(2)->schema([
                                         TextInput::make('title')
                                             ->required()
                                             ->label('Course Title')

@@ -19,6 +19,16 @@
         </url>
     @endforeach
 
+    {{-- Teacher Training Categories --}}
+    @foreach($teacherCategories ?? [] as $tCategory)
+        <url>
+            <loc>{{ route('teacher-training.category', $tCategory->slug) }}</loc>
+            <lastmod>{{ $tCategory->updated_at ? $tCategory->updated_at->toAtomString() : now()->toAtomString() }}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.8</priority>
+        </url>
+    @endforeach
+
     {{-- Individual Courses --}}
     @foreach($courses as $course)
         <url>

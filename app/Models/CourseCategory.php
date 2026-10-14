@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CourseAudience;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ class CourseCategory extends Model
     protected function casts(): array
     {
         return [
+            'target_audience' => CourseAudience::class,
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
@@ -42,6 +44,45 @@ class CourseCategory extends Model
     public function activeCourses()
     {
         return $this->hasMany(Course::class)->where('is_active', true)->orderBy('sort_order');
+    }
+
+    public function studentCourses()
+    {
+        return $this->hasMany(Course::class)->where('is_active', true)->whereIn('target_audience', ['student', 'both'])->orderBy('sort_order');
+    }
+
+    public function teacherCourses()
+    {
+        return $this->hasMany(Course::class)->where('is_active', true)->whereIn('target_audience', ['teacher', 'both'])->orderBy('sort_order');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeForStudents($query)
+    {
+        return $query->whereIn('target_audience', ['student', 'both']);
+    }
+
+    public function scopeForTeachers($query)
+    {
+        return $query->whereIn('target_audience', ['teacher', 'both']);
+    }
+
+    public function isForStudents(): bool
+    {
+        $aud = $this->target_audience instanceof CourseAudience ? $this->target_audience->value : (string) ($this->target_audience ?? 'both');
+
+        return in_array($aud, ['student', 'both', '']);
+    }
+
+    public function isForTeachers(): bool
+    {
+        $aud = $this->target_audience instanceof CourseAudience ? $this->target_audience->value : (string) ($this->target_audience ?? 'both');
+
+        return in_array($aud, ['teacher', 'both']);
     }
 
     public function getImageUrlAttribute(): string

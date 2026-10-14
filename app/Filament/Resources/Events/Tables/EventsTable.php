@@ -81,6 +81,13 @@ class EventsTable
                     ->label('Fee')
                     ->formatStateUsing(fn ($state) => $state > 0 ? '₹'.number_format($state) : 'Free')
                     ->sortable(),
+
+                TextColumn::make('certificates_count')
+                    ->counts('certificates')
+                    ->badge()
+                    ->color('info')
+                    ->label('Certificates')
+                    ->sortable(),
             ])
             ->defaultSort('start_date', 'asc')
             ->filters([

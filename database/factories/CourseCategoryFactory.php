@@ -32,6 +32,7 @@ class CourseCategoryFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'target_audience' => 'both',
             'is_active' => true,
             'sort_order' => fake()->numberBetween(1, 100),
         ];
