@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Events\RelationManagers;
 
 use App\Models\EventCertificate;
+use App\Services\EventCertificateCleanupService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -201,6 +202,36 @@ class CertificatesRelationManager extends RelationManager
                             ->title("Successfully uploaded {$count} participant certificates!")
                             ->success()
                             ->send();
+                    }),
+
+                Action::make('clean_expired')
+                    ->label('Clean Expired (> 30 Days)')
+                    ->icon(Heroicon::OutlinedTrash)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Clean Expired Participant Certificates')
+                    ->modalDescription('Permanently delete certificate PDFs and database records for this event if it concluded more than 30 days ago to reclaim server disk space.')
+                    ->action(function (): void {
+                        $event = $this->getOwnerRecord();
+                        $result = app(EventCertificateCleanupService::class)->cleanExpired(
+                            days: 30,
+                            dryRun: false,
+                            event: $event
+                        );
+
+                        if ($result['deleted_count'] > 0) {
+                            Notification::make()
+                                ->title("Cleaned {$result['deleted_count']} expired certificate(s)")
+                                ->body("Freed {$result['freed_formatted']} of disk space.")
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('No expired certificates')
+                                ->body('This event does not have any certificates older than 30 days.')
+                                ->info()
+                                ->send();
+                        }
                     }),
             ])
             ->recordActions([

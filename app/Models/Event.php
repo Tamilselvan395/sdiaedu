@@ -43,6 +43,12 @@ class Event extends Model
                 $event->end_date = $event->start_date->copy()->addHours(2);
             }
         });
+
+        static::deleting(function (self $event) {
+            foreach ($event->certificates as $certificate) {
+                $certificate->delete();
+            }
+        });
     }
 
     public function scopeUpcoming(Builder $query): Builder

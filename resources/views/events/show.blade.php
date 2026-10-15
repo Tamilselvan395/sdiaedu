@@ -209,6 +209,10 @@
                                 <p class="text-sm text-slate-600 mt-1">
                                     Search by participant name or registration number to download official PDF certificates.
                                 </p>
+                                <p class="text-[11px] sm:text-xs text-amber-800 bg-amber-50/90 border border-amber-200/80 rounded-xl px-3 py-1.5 inline-flex items-center gap-1.5 font-medium mt-1">
+                                    <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                                    <span>Certificates are retained for 30 days following the event. Please download your copy promptly.</span>
+                                </p>
                             </div>
                             @if($certificates->count() > 0)
                                 <div class="shrink-0">
@@ -325,16 +329,29 @@
 
                             </div>
                         @else
-                            <!-- Placeholder state when no certificates have been uploaded yet -->
-                            <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center space-y-3">
-                                <div class="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-xl">
-                                    <i class="fa-solid fa-certificate"></i>
+                            @if($event->is_completed && ($event->end_date ?? $event->start_date)?->diffInDays(now()) > 30)
+                                <!-- Expired state: 30 days retention concluded -->
+                                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center space-y-3">
+                                    <div class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto text-xl">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </div>
+                                    <h4 class="font-bold text-slate-800 text-base">Certificate Download Period Concluded</h4>
+                                    <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                                        The 30-day online download window for this completed event has ended. If you require an archived certificate copy, please contact your academy coordinator.
+                                    </p>
                                 </div>
-                                <h4 class="font-bold text-slate-800 text-base">Participant Certificates Upload</h4>
-                                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                                    Official participant certificates will be uploaded here following event verification. Check back soon or contact your event coordinator for updates.
-                                </p>
-                            </div>
+                            @else
+                                <!-- Placeholder state when no certificates have been uploaded yet -->
+                                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center space-y-3">
+                                    <div class="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-xl">
+                                        <i class="fa-solid fa-certificate"></i>
+                                    </div>
+                                    <h4 class="font-bold text-slate-800 text-base">Participant Certificates Upload</h4>
+                                    <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                                        Official participant certificates will be uploaded here following event verification. Check back soon or contact your event coordinator for updates.
+                                    </p>
+                                </div>
+                            @endif
                         @endif
                     </div>
 
