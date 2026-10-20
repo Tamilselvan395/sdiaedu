@@ -69,8 +69,15 @@ class ManageAcademySettings extends Page
                                         ->default('info@srideekshaa.com'),
 
                                     TextInput::make('phone')
-                                        ->label('Primary Phone')
+                                        ->label('Primary Phone / Reception Desk')
+                                        ->placeholder('e.g. +91 98765 43210')
                                         ->default('+91 98765 43210'),
+
+                                    TextInput::make('phone_secondary')
+                                        ->label('Secondary Phone / Counseling Desk')
+                                        ->placeholder('e.g. +91 93446 20346')
+                                        ->helperText('Displayed alongside the primary phone in the website footer and contact page.')
+                                        ->default('+91 93446 20346'),
 
                                     TextInput::make('whatsapp_number')
                                         ->label('WhatsApp Number (with country code)')

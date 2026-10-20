@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Location;
+use App\Models\Setting;
 use App\Models\Teacher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class PageControllerTest extends TestCase
@@ -38,6 +40,30 @@ class PageControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Sri Deekshaa Coimbatore Main');
+    }
+
+    public function test_contact_page_and_footer_display_two_phone_numbers(): void
+    {
+        Setting::updateOrCreate(['key' => 'phone'], [
+            'group' => 'general',
+            'value' => '+91 98765 43210',
+            'type' => 'text',
+        ]);
+        Setting::updateOrCreate(['key' => 'phone_secondary'], [
+            'group' => 'general',
+            'value' => '+91 93446 20346',
+            'type' => 'text',
+        ]);
+
+        Cache::flush();
+
+        $response = $this->get(route('pages.contact'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Phone &amp; Counseling Desk', false);
+        $response->assertSee('+91 98765 43210');
+        $response->assertSee('+91 93446 20346');
+        $response->assertSee('Contact Campus');
     }
 
     public function test_for_kids_page_returns_ok_and_shows_kids_courses(): void

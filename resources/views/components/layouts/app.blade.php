@@ -19,6 +19,29 @@
         );
         $whatsappNumber = $globalSettings['whatsapp_number'] ?? '919876543210';
         $phone = $globalSettings['phone'] ?? '+91 98765 43210';
+        $phoneSecondary = $globalSettings['phone_secondary'] ?? ($globalSettings['phone_counseling'] ?? '+91 93446 20346');
+
+        // Resolve active phone numbers (supports two separate settings or delimiter-separated phone strings)
+        $phoneNumbers = [];
+        if (!empty($phone)) {
+            if (str_contains($phone, '/') || str_contains($phone, ',')) {
+                foreach (preg_split('/[\/,]+/', $phone) as $p) {
+                    $p = trim($p);
+                    if (!empty($p) && !in_array($p, $phoneNumbers)) {
+                        $phoneNumbers[] = $p;
+                    }
+                }
+            } else {
+                $phoneNumbers[] = trim($phone);
+            }
+        }
+        if (!empty($phoneSecondary) && !in_array(trim($phoneSecondary), $phoneNumbers)) {
+            $phoneNumbers[] = trim($phoneSecondary);
+        }
+        if (count($phoneNumbers) < 2) {
+            $phoneNumbers[] = '+91 93446 20346';
+        }
+
         $email = $globalSettings['email'] ?? 'info@srideekshaa.com';
         $canonicalUrl = $canonical ?? $canonicalUrl ?? url()->current();
         $logoUrl = !empty($globalSettings['logo_path']) ? asset('storage/' . $globalSettings['logo_path']) : asset('images/sdia.png');
@@ -87,10 +110,19 @@
                 </span>
             </div>
             <div class="flex items-center gap-4 text-xs sm:text-sm">
-                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="hover:text-amber-400 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-phone text-amber-400 text-xs"></i>
-                    <span>{{ $phone }}</span>
-                </a>
+                <div class="flex items-center gap-2">
+                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phoneNumbers[0]) }}" class="hover:text-amber-400 transition flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-phone text-amber-400 text-xs"></i>
+                        <span>{{ $phoneNumbers[0] }}</span>
+                    </a>
+                    @if(isset($phoneNumbers[1]))
+                        <span class="text-slate-700 hidden md:inline">|</span>
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phoneNumbers[1]) }}" class="hidden md:flex hover:text-amber-400 transition items-center gap-1.5 font-medium" title="Counseling Desk">
+                            <i class="fa-solid fa-headset text-amber-400 text-xs"></i>
+                            <span>{{ $phoneNumbers[1] }}</span>
+                        </a>
+                    @endif
+                </div>
                 <span class="text-slate-700 hidden sm:inline">|</span>
                 <a href="mailto:{{ $email }}" class="hidden sm:flex hover:text-amber-400 transition items-center gap-1.5">
                     <i class="fa-solid fa-envelope text-amber-400 text-xs"></i>
@@ -674,10 +706,15 @@
                                 <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-1">
                                     Direct Contact
                                 </div>
-                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <i class="fa-solid fa-phone w-5 text-center text-amber-600"></i>
-                                    <span>{{ $phone }}</span>
-                                </a>
+                                @foreach($phoneNumbers as $idx => $phoneItem)
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phoneItem) }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
+                                        <i class="fa-solid {{ $idx === 0 ? 'fa-phone' : 'fa-headset' }} w-5 text-center text-amber-600"></i>
+                                        <span>{{ $phoneItem }}</span>
+                                        @if($idx === 1)
+                                            <span class="ml-auto text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Counseling</span>
+                                        @endif
+                                    </a>
+                                @endforeach
                                 <a href="mailto:{{ $email }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
                                     <i class="fa-solid fa-envelope w-5 text-center text-amber-600"></i>
                                     <span class="truncate">{{ $email }}</span>
@@ -828,7 +865,19 @@
                     </h4>
                     <div class="space-y-2.5 text-sm leading-relaxed text-slate-400">
                         <p class="text-slate-300">{{ $globalSettings['address'] ?? 'Plot No. 42, 2nd Avenue' }}, {{ $globalSettings['city'] ?? 'Chennai' }} - {{ $globalSettings['pincode'] ?? '600040' }}</p>
-                        <p><strong class="text-slate-200">Phone:</strong> {{ $phone }}</p>
+                        <div class="flex items-start gap-1.5">
+                            <strong class="text-slate-200 shrink-0">Phone:</strong>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                @foreach($phoneNumbers as $idx => $phoneItem)
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phoneItem) }}" class="text-slate-300 hover:text-amber-400 transition">
+                                        {{ $phoneItem }}
+                                    </a>
+                                    @if(!$loop->last)
+                                        <span class="text-slate-600">/</span>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
                         <p><strong class="text-slate-200">Email:</strong> {{ $email }}</p>
                         <p><strong class="text-slate-200">Hours:</strong> {{ $globalSettings['working_hours'] ?? 'Mon - Sat: 9am - 7:30pm' }}</p>
                     </div>

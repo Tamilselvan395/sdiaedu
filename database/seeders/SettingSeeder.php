@@ -19,6 +19,7 @@ class SettingSeeder extends Seeder
             ['group' => 'general', 'key' => 'announcement_bar', 'value' => 'Admissions Open for New Term | Book a Free Counselling & Assessment Session', 'type' => 'text', 'description' => 'Top Bar Announcement'],
             ['group' => 'general', 'key' => 'email', 'value' => 'info@srideekshaa.com', 'type' => 'text', 'description' => 'Official Email'],
             ['group' => 'general', 'key' => 'phone', 'value' => '+91 98765 43210', 'type' => 'text', 'description' => 'Primary Contact Phone'],
+            ['group' => 'general', 'key' => 'phone_secondary', 'value' => '+91 93446 20346', 'type' => 'text', 'description' => 'Secondary / Counseling Desk Phone'],
             ['group' => 'general', 'key' => 'whatsapp_number', 'value' => '919876543210', 'type' => 'text', 'description' => 'WhatsApp Number (with country code, no symbols)'],
             ['group' => 'general', 'key' => 'whatsapp_default_message', 'value' => 'Hello Sri Deekshaa International Academy, I would like to know more about your courses.', 'type' => 'text', 'description' => 'Default WhatsApp Greeting'],
 

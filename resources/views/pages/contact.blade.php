@@ -1,6 +1,29 @@
 @php
     $contactTitle = $globalSettings['seo_contact_title'] ?? 'Contact Us & Campus Location | Sri Deekshaa International Academy';
     $contactDesc = $globalSettings['seo_contact_description'] ?? 'Get in touch with Sri Deekshaa International Academy. Visit our Chennai campus, call us, or book an academic counseling session.';
+
+    $phone = $globalSettings['phone'] ?? '+91 98765 43210';
+    $phoneSecondary = $globalSettings['phone_secondary'] ?? ($globalSettings['phone_counseling'] ?? '+91 93446 20346');
+
+    $phoneNumbers = [];
+    if (!empty($phone)) {
+        if (str_contains($phone, '/') || str_contains($phone, ',')) {
+            foreach (preg_split('/[\/,]+/', $phone) as $p) {
+                $p = trim($p);
+                if (!empty($p) && !in_array($p, $phoneNumbers)) {
+                    $phoneNumbers[] = $p;
+                }
+            }
+        } else {
+            $phoneNumbers[] = trim($phone);
+        }
+    }
+    if (!empty($phoneSecondary) && !in_array(trim($phoneSecondary), $phoneNumbers)) {
+        $phoneNumbers[] = trim($phoneSecondary);
+    }
+    if (count($phoneNumbers) < 2) {
+        $phoneNumbers[] = '+91 93446 20346';
+    }
 @endphp
 <x-layouts.app :title="$contactTitle" :metaDescription="$contactDesc">
     <!-- Header -->
@@ -62,11 +85,19 @@
                                 <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-700 shrink-0 w-9 h-9 flex items-center justify-center">
                                     <i class="fa-solid fa-phone text-base"></i>
                                 </div>
-                                <div>
+                                <div class="space-y-1">
                                     <strong class="block text-slate-900 font-semibold">Phone &amp; Counseling Desk</strong>
-                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $globalSettings['phone'] ?? '+91 98765 43210') }}" class="text-amber-600 hover:underline">
-                                        {{ $globalSettings['phone'] ?? '+91 98765 43210' }}
-                                    </a>
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-sm">
+                                        @foreach($phoneNumbers as $idx => $phoneItem)
+                                            <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phoneItem) }}" class="text-amber-600 hover:text-amber-700 font-medium hover:underline inline-flex items-center gap-1.5 transition">
+                                                <i class="fa-solid {{ $idx === 0 ? 'fa-phone-volume text-emerald-600' : 'fa-headset text-amber-600' }} text-xs"></i>
+                                                <span>{{ $phoneItem }}</span>
+                                            </a>
+                                            @if(!$loop->last)
+                                                <span class="text-slate-300 hidden sm:inline">|</span>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
 
