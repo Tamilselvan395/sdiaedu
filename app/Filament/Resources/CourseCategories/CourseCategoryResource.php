@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CourseCategories;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\CourseCategories\Pages\CreateCourseCategory;
 use App\Filament\Resources\CourseCategories\Pages\EditCourseCategory;
 use App\Filament\Resources\CourseCategories\Pages\ListCourseCategories;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class CourseCategoryResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = CourseCategory::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;

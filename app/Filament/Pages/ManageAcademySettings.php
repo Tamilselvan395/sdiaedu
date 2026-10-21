@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Models\Setting;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class ManageAcademySettings extends Page
 {
+    use RequiresFullAccess;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static string|UnitEnum|null $navigationGroup = 'Settings';

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Batches;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Batches\Pages\CreateBatch;
 use App\Filament\Resources\Batches\Pages\EditBatch;
 use App\Filament\Resources\Batches\Pages\ListBatches;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class BatchResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Batch::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Teachers;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Teachers\Pages\CreateTeacher;
 use App\Filament\Resources\Teachers\Pages\EditTeacher;
 use App\Filament\Resources\Teachers\Pages\ListTeachers;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class TeacherResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Teacher::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;

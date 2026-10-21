@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Courses;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Courses\Pages\CreateCourse;
 use App\Filament\Resources\Courses\Pages\EditCourse;
 use App\Filament\Resources\Courses\Pages\ListCourses;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class CourseResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Course::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;

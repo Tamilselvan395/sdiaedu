@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Certificates;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Certificates\Pages\CreateCertificate;
 use App\Filament\Resources\Certificates\Pages\EditCertificate;
 use App\Filament\Resources\Certificates\Pages\ListCertificates;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class CertificateResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Certificate::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;

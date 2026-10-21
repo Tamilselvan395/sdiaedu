@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Settings;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Settings\Pages\CreateSetting;
 use App\Filament\Resources\Settings\Pages\EditSetting;
 use App\Filament\Resources\Settings\Pages\ListSettings;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class SettingResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Setting::class;
 
     protected static bool $shouldRegisterNavigation = false;

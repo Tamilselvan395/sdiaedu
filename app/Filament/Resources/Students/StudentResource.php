@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Students;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Students\Pages\CreateStudent;
 use App\Filament\Resources\Students\Pages\EditStudent;
 use App\Filament\Resources\Students\Pages\ListStudents;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class StudentResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Student::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ListEvents;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class EventResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Event::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;

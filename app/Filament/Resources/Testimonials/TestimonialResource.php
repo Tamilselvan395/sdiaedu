@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Testimonials;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Testimonials\Pages\CreateTestimonial;
 use App\Filament\Resources\Testimonials\Pages\EditTestimonial;
 use App\Filament\Resources\Testimonials\Pages\ListTestimonials;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class TestimonialResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Testimonial::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedStar;

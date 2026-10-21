@@ -18,7 +18,7 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
         $activeCourses = Course::where('is_active', true)->count();
         $totalStudents = Student::count();
 
-        return [
+        $stats = [
             Stat::make('Total Enquiries', $totalEnquiries)
                 ->description('All time leads received')
                 ->color('primary'),
@@ -26,14 +26,18 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
             Stat::make('New Leads', $newLeads)
                 ->description('Awaiting first contact')
                 ->color('warning'),
-
-            Stat::make('Active Courses', $activeCourses)
-                ->description('Currently offered courses')
-                ->color('success'),
-
-            Stat::make('Students Enrolled', $totalStudents)
-                ->description('Across all batches')
-                ->color('info'),
         ];
+
+        if (auth()->user()?->hasFullAccess()) {
+            $stats[] = Stat::make('Active Courses', $activeCourses)
+                ->description('Currently offered courses')
+                ->color('success');
+
+            $stats[] = Stat::make('Students Enrolled', $totalStudents)
+                ->description('Across all batches')
+                ->color('info');
+        }
+
+        return $stats;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Locations;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Locations\Pages\CreateLocation;
 use App\Filament\Resources\Locations\Pages\EditLocation;
 use App\Filament\Resources\Locations\Pages\ListLocations;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class LocationResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Location::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;

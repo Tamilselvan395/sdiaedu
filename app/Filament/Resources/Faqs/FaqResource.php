@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Faqs;
 
+use App\Filament\Concerns\RequiresFullAccess;
 use App\Filament\Resources\Faqs\Pages\CreateFaq;
 use App\Filament\Resources\Faqs\Pages\EditFaq;
 use App\Filament\Resources\Faqs\Pages\ListFaqs;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class FaqResource extends Resource
 {
+    use RequiresFullAccess;
+
     protected static ?string $model = Faq::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
