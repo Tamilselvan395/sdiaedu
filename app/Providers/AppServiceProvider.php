@@ -2,14 +2,26 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogAuthenticationActivity;
+use App\Models\Batch;
+use App\Models\BlogPost;
+use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\CourseCategory;
+use App\Models\Enquiry;
 use App\Models\Event;
+use App\Models\Location;
 use App\Models\Setting;
+use App\Models\Student;
+use App\Models\Teacher;
+use App\Models\Testimonial;
+use App\Models\User;
+use App\Observers\AuditActivityObserver;
 use App\Services\ImageUploadService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,6 +40,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register authentication activity logging
+        EventFacade::subscribe(LogAuthenticationActivity::class);
+
+        // Register model audit logging
+        foreach ([
+            User::class,
+            Enquiry::class,
+            Course::class,
+            CourseCategory::class,
+            Student::class,
+            Teacher::class,
+            Batch::class,
+            Event::class,
+            Certificate::class,
+            Setting::class,
+            BlogPost::class,
+            Testimonial::class,
+            Location::class,
+        ] as $auditedModel) {
+            $auditedModel::observe(AuditActivityObserver::class);
+        }
+
         FileUpload::macro('asWebp', function () {
             return ImageUploadService::configure($this);
         });
